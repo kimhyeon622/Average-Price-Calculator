@@ -5,32 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>코인 평단가 계산기</title>
   <link rel="manifest" href="manifest.json" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+      margin: 0;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
+    }
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+    input[type="number"] {
+      width: 90%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      text-align: right;
+    }
+    .total {
+      font-weight: bold;
+      color: #2c3e50;
+    }
+    button {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #2980b9;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    button:hover {
+      background-color: #1f6391;
+    }
+    #result {
+      font-size: 1.2em;
+      text-align: center;
+      font-weight: bold;
+      color: #16a085;
+    }
+  </style>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js');
     }
-  </script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    input { width: 100px; margin: 5px; }
-    button { margin: 10px 5px; }
-  </style>
-</head>
-<body>
-  <h2>📈 코인 평단가 계산기</h2>
-  <table id="inputTable">
-    <tr><th>매수가</th><th>수량</th></tr>
-    <tr><td><input type="number" class="price" step="0.01"></td><td><input type="number" class="amount" step="0.0001"></td></tr>
-  </table>
-  <button onclick="addRow()">행 추가</button>
-  <button onclick="calculate()">평단가 계산</button>
-  <h3 id="result">평단가: - 원</h3>
 
-  <script>
     function addRow() {
       const table = document.getElementById('inputTable');
       const row = table.insertRow();
-      row.innerHTML = `<td><input type="number" class="price" step="0.01"></td><td><input type="number" class="amount" step="0.0001"></td>`;
+      row.innerHTML = `<td><input type="number" class="price" step="0.01" oninput="updateTotal(this)"></td>
+                       <td><input type="number" class="amount" step="0.0001" oninput="updateTotal(this)"></td>
+                       <td class="total">-</td>`;
+    }
+
+    function updateTotal(input) {
+      const row = input.closest('tr');
+      const priceInput = row.querySelector('.price');
+      const amountInput = row.querySelector('.amount');
+      const totalCell = row.querySelector('.total');
+
+      const price = parseFloat(priceInput.value);
+      const qty = parseFloat(amountInput.value);
+
+      if (!isNaN(price) && !isNaN(qty)) {
+        totalCell.textContent = (price * qty).toFixed(2) + ' 원';
+      } else {
+        totalCell.textContent = '-';
+      }
     }
 
     function calculate() {
@@ -52,9 +114,25 @@
         result.innerText = "⚠️ 수량이 0입니다.";
       } else {
         const avg = totalCost / totalQty;
-        result.innerText = `평단가: ${avg.toFixed(2)} 원`;
+        result.innerText = `📊 평단가: ${avg.toFixed(2)} 원`;
       }
     }
   </script>
+</head>
+<body>
+  <h2>📈 코인 평단가 계산기</h2>
+  <table id="inputTable">
+    <tr><th>매수가</th><th>수량</th><th>매수금액</th></tr>
+    <tr>
+      <td><input type="number" class="price" step="0.01" oninput="updateTotal(this)"></td>
+      <td><input type="number" class="amount" step="0.0001" oninput="updateTotal(this)"></td>
+      <td class="total">-</td>
+    </tr>
+  </table>
+  <div style="text-align:center;">
+    <button onclick="addRow()">＋ 행 추가</button>
+    <button onclick="calculate()">📐 평단가 계산</button>
+  </div>
+  <h3 id="result">📊 평단가: - 원</h3>
 </body>
 </html>
